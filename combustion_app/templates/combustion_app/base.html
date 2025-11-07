@@ -175,6 +175,27 @@
         color: #777;
         margin: 0;
       }
+      @media print {
+            
+            body > nav,
+            .btn,
+            a[href^="{% url 'simulation_input' %}"] {
+                display: none !important;
+            }
+            
+            /* Ensure content fills the page */
+            .container {
+                max-width: 100% !important;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            .card, .stat-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
     </style>
   </head>
   <body>
