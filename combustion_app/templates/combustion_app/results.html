@@ -1,0 +1,180 @@
+{% extends 'combustion_app/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Simulation Results: {{ run.name }}</h2>
+    <p>
+        <strong>Fuel Type:</strong> {{ run.fuel.name }} | 
+        <strong>Run Date:</strong> {{ run.run_date|date:"d M Y, h:i A" }}
+    </p>
+    <a href="{% url 'simulation_input' %}" class="btn" style="background-color: #555; margin-bottom: 20px;">&larr; Run New Simulation</a>
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <h4>💰 Cost of Energy</h4>
+        <div class="stat-value">
+            ₹{{ run.cost_per_gj|floatformat:2 }}
+        </div>
+        <div class="stat-context">
+            per GJ
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h4>🔥 Furnace Efficiency</h4>
+        <div class="stat-value">
+            {{ run.calculated_efficiency|floatformat:2 }}%
+        </div>
+        <div class="stat-context">
+            Energy Recovered
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h4>💨 CO Emissions</h4>
+        <div class="stat-value">
+            {{ run.emissions_co_ppm|floatformat:0 }}
+        </div>
+        <div class="stat-context">
+            ppm (estimated)
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h4>🌡️ Adiabatic Temp</h4>
+        <div class="stat-value">
+            {{ run.t_adiabatic_c|floatformat:0 }}°C
+        </div>
+        <div class="stat-context">
+            Theoretical Max
+        </div>
+    </div>
+
+</div>
+
+<div class="card">
+    <h3>💰 Cost Analysis</h3>
+    <table class="results-table">
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td><strong>Cost of Energy</strong></td>
+            <td><strong>₹{{ run.cost_per_gj|floatformat:2 }} / GJ</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Operational Cost</strong></td>
+            <td>₹{{ run.cost_per_hour|floatformat:2 }} / hour</td>
+        </tr>
+        <tr>
+            <td>Fuel Cost (as run)</td>
+            <td>₹{{ run.fuel.cost_per_tonne|floatformat:2 }} / tonne</td>
+        </tr>
+        <tr>
+            <td>Furnace Load (as run)</td>
+            <td>{{ run.furnace_load_gj_hour|floatformat:1 }} GJ/hr</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h3>🔥 Key Performance Indicators (KPIs)</h3>
+    <table class="results-table">
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td><strong>Furnace Efficiency (₹\eta₹)</strong></td>
+            <td><strong>{{ run.calculated_efficiency|floatformat:2 }} %</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Theoretical Adiabatic Temp (₹T_{ad}₹)</strong></td>
+            <td>{{ run.t_adiabatic_c|floatformat:2 }} °C</td>
+        </tr>
+        <tr>
+            <td><strong>Estimated Exhaust Gas Temp (₹T_{exh}₹)</strong></td>
+            <td>{{ run.exhaust_temp_c|floatformat:2 }} °C</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h3>💨 Estimated Emissions</h3>
+    <table class="results-table">
+        <tr>
+            <th>Metric</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td><strong>Carbon Monoxide (CO)</strong></td>
+            <td>{{ run.emissions_co_ppm|floatformat:0 }} ppm</td>
+        </tr>
+        <tr>
+            <td><strong>Nitrogen Oxides (NOx)</strong></td>
+            <td>{{ run.emissions_nox_ppm|floatformat:0 }} ppm</td>
+        </tr>
+        <tr>
+            <td><strong>Flue Gas ₹\text{CO}_2₹</strong></td>
+            <td>{{ run.flue_gas_co2_percent|floatformat:2 }} % (vol.)</td>
+        </tr>
+    </table>
+</div>
+
+<div class="card">
+    <h3>📈 Validation Plot: Efficiency vs. Excess Air</h3>
+    <p>This plot compares your current run against a baseline model and placeholder experimental data.</p>
+    <div style="width: 100%; height: 400px;">
+        <canvas id="validationChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ... (Your existing Chart.js script for 'validationChart') ...
+    const chartData = JSON.parse('{{ chart_data|safe }}');
+    const ctx = document.getElementById('validationChart').getContext('2d');
+    const validationChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                {
+                    label: 'Model Efficiency',
+                    data: chartData.model_data,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'Actual Efficiency (Demo)',
+                    data: chartData.actual_data,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'Current Run',
+                    data: [{ x: chartData.current_run.x, y: chartData.current_run.y }],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    type: 'scatter',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { title: { display: true, text: 'Excess Air (%)' } },
+                      y: { title: { display: true, text: 'Efficiency (%)' } } },
+            plugins: { tooltip: { mode: 'index', intersect: false, } }
+        }
+    });
+</script>
+{% endblock %}

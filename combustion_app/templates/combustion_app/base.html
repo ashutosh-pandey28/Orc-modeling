@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }} | Furnace Model</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      /* --- Base & Root Styles --- */
+      :root {
+        --primary-color: #0a4a2b;
+        --secondary-color: #f4f4f4;
+        --border-color: #ddd;
+        --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background-color: var(--secondary-color);
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1,
+      h2,
+      h3 {
+        color: var(--primary-color);
+        margin-top: 0;
+      }
+
+      /* --- Tab Navigation Styles --- */
+      nav {
+        background-color: #fff; /* White background for tabs */
+        padding: 0 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-bottom: 1px solid var(--border-color);
+      }
+      nav .nav-container {
+        display: flex;
+        align-items: center;
+      }
+      nav .nav-link {
+        color: #555; /* Non-active color */
+        padding: 20px 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        border-bottom: 3px solid transparent; /* Hidden border */
+        transition: all 0.2s ease;
+      }
+      nav .nav-link:hover {
+        color: #333;
+        background-color: #f9f9f9; /* Slight hover effect */
+      }
+      nav .nav-link.active {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color); /* Active tab highlight */
+      }
+
+      /* --- Card & Form Styles --- */
+      .card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+      form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+      }
+      form input[type="text"],
+      form input[type="number"],
+      form select {
+        width: 95%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 16px;
+        margin-bottom: 15px;
+        background-color: #fff;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .btn {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 14px 25px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s ease;
+      }
+      .btn:hover {
+        background-color: #073820;
+      }
+
+      /* --- Alert/Message Styles --- */
+      .alert {
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+      }
+      .alert-error {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+      }
+
+      /* --- Results Table Styles --- */
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .results-table th,
+      .results-table td {
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        text-align: left;
+      }
+      .results-table th {
+        background-color: #f9f9f9;
+        width: 40%;
+      }
+      .results-table td {
+        font-weight: 500;
+      }
+
+      /* --- "Stats at a Glance" Grid Styles --- */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+      .stat-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+        padding: 20px;
+        border-left: 5px solid var(--primary-color);
+      }
+      .stat-card h4 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #555;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+      }
+      .stat-card .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #222;
+        margin: 0 0 5px 0;
+        line-height: 1.1;
+      }
+      .stat-card .stat-context {
+        font-size: 14px;
+        color: #777;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-container">
+        <a
+          href="{% url 'simulation_input' %}"
+          class="nav-link {% if request.resolver_match.url_name == 'simulation_input' %}active{% endif %}"
+        >
+          Standard Calculation
+        </a>
+        <a
+          href="{% url 'analysis_view' %}"
+          class="nav-link {% if request.resolver_match.url_name == 'analysis_view' %}active{% endif %}"
+        >
+          "What-If" Analysis
+        </a>
+      </div>
+    </nav>
+
+    <div class="container">
+      {% if messages %} {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }}">
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% block content %}{% endblock %}
+    </div>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
