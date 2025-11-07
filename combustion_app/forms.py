@@ -38,3 +38,15 @@ class AnalysisForm(forms.Form):
     constant_moisture = forms.FloatField(initial=10, label="Constant Moisture (%)")
     constant_excess_air = forms.FloatField(initial=40, label="Constant Excess Air (%)")
     constant_load = forms.FloatField(initial=1, label="Constant Furnace Load (GJ/hr)")
+    
+    
+class ValidationForm(forms.Form):
+    fuel = forms.ModelChoiceField(queryset=Fuel.objects.all(), 
+                                  label="Select Fuel for Model",
+                                  empty_label="--- Select a Fuel ---",
+                                  widget=forms.Select(attrs={'class': 'form-control'}))
+    
+    constant_moisture = forms.FloatField(initial=10, label="Constant Moisture (%) for this test")
+    constant_load = forms.FloatField(initial=1, label="Constant Furnace Load (GJ/hr) for this test")
+
+    validation_file = forms.FileField(label="Upload CSV File")

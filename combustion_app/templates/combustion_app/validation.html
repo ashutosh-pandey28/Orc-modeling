@@ -1,0 +1,113 @@
+{% extends 'combustion_app/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Model Validation (vs. Real Data)</h2>
+    <p>
+        Upload a CSV file with your real-world experimental data to compare it against the model's predictions.
+        <br>
+        Your CSV **must** contain columns named <code>excess_air</code> and <code>measured_efficiency</code>.
+    </p>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.fuel.id_for_label }}">{{ form.fuel.label }}</label>
+            {{ form.fuel }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.constant_moisture.id_for_label }}">{{ form.constant_moisture.label }}</label>
+            {{ form.constant_moisture }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.constant_load.id_for_label }}">{{ form.constant_load.label }}</label>
+            {{ form.constant_load }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.validation_file.id_for_label }}">{{ form.validation_file.label }}</label>
+            {{ form.validation_file }}
+        </div>
+
+        <button type="submit" class="btn" style="margin-top: 20px;">Run Validation</button>
+    </form>
+</div>
+
+{% if chart_data %}
+<div class="card">
+    <h3>Validation: Model vs. Actual Data</h3>
+    <p>This scatter plot compares your uploaded data against the model's predictions for the same parameters.</p>
+    
+    <div style="width: 100%; height: 500px;">
+        <canvas id="validationChart"></canvas>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if chart_data %}
+<script>
+    const validationData = JSON.parse('{{ chart_data|safe }}');
+    const xAxisLabel = validationData.x_axis_label;
+
+    // We need to format the data as {x, y} points for a scatter plot
+    const modelPoints = validationData.labels.map((label, index) => ({
+        x: label,
+        y: validationData.model_data[index]
+    }));
+
+    const actualPoints = validationData.labels.map((label, index) => ({
+        x: label,
+        y: validationData.actual_data[index]
+    }));
+
+    new Chart(document.getElementById('validationChart').getContext('2d'), {
+        type: 'scatter', // Use a scatter plot
+        data: {
+            datasets: [
+                {
+                    label: 'Model Prediction',
+                    data: modelPoints,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                },
+                {
+                    label: 'Your Actual Data (CSV)',
+                    data: actualPoints,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { 
+                    type: 'linear', 
+                    position: 'bottom',
+                    title: { display: true, text: xAxisLabel }
+                },
+                y: { title: { display: true, text: 'Efficiency (%)' } }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += `(${context.parsed.x}, ${context.parsed.y.toFixed(2)})`;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

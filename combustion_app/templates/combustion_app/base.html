@@ -213,6 +213,10 @@
         >
           "What-If" Analysis
         </a>
+        <a href="{% url 'validation_view' %}" 
+            class="nav-link {% if request.resolver_match.url_name == 'validation_view' %}active{% endif %}">
+            Model Validation
+        </a>
       </div>
     </nav>
 

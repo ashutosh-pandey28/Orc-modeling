@@ -1,0 +1,91 @@
+{% extends 'combustion_app/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Comparison Results</h2>
+    <p>Showing a side-by-side comparison of your selected simulation runs.</p>
+    <a href="{% url 'simulation_input' %}" class="btn" style="background-color: #555; margin-bottom: 20px;">&larr; Back to History</a>
+</div>
+
+<div class="card">
+    <table class="results-table" style="width: 100%;">
+        <thead>
+            <tr>
+                <th style="width: 20%;">Metric</th>
+                {% for run in runs %}
+                    <th style="text-align: center;">
+                        {{ run.name }}<br>
+                        <small>({{ run.run_date|date:"d M Y" }})</small>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: #f9f9f9;"><td colspan="{{ runs|length|add:1 }}"><strong>💰 Cost Analysis</strong></td></tr>
+            <tr>
+                <td><strong>Cost of Energy (₹/GJ)</strong></td>
+                {% for run in runs %}
+                    <td style="text-align: center; font-weight: bold; font-size: 1.1em;">{{ run.cost_per_gj|floatformat:2 }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Operational Cost (₹/hr)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.cost_per_hour|floatformat:2 }}</td>
+                {% endfor %}
+            </tr>
+            <tr style="background-color: #f9f9f9;"><td colspan="{{ runs|length|add:1 }}"><strong>🔥 Performance</strong></td></tr>
+            <tr>
+                <td><strong>Efficiency (%)</strong></td>
+                {% for run in runs %}
+                    <td style="text-align: center; font-weight: bold; font-size: 1.1em;">{{ run.calculated_efficiency|floatformat:2 }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Adiabatic Temp (°C)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.t_adiabatic_c|floatformat:0 }}</td>
+                {% endfor %}
+            </tr>
+            <tr style="background-color: #f9f9f9;"><td colspan="{{ runs|length|add:1 }}"><strong>💨 Emissions</strong></td></tr>
+            <tr>
+                <td>CO (ppm)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.emissions_co_ppm|floatformat:0 }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>NOx (ppm)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.emissions_nox_ppm|floatformat:0 }}</td>
+                {% endfor %}
+            </tr>
+            <tr style="background-color: #f9f9f9;"><td colspan="{{ runs|length|add:1 }}"><strong>Parameters</strong></td></tr>
+            <tr>
+                <td>Fuel</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.fuel.name|default:"N/A" }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Moisture (%)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.moisture_percent|floatformat:1 }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Excess Air (%)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.excess_air_percent|floatformat:1 }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <td>Furnace Load (GJ/hr)</td>
+                {% for run in runs %}
+                    <td style="text-align: center;">{{ run.furnace_load_gj_hour|floatformat:1 }}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -19,7 +19,7 @@
             {% if form.fuel.errors %}
                 <div style="color: red;">{{ form.fuel.errors }}</div>
             {% endif %}
-            <small>Add new fuels in the <a href="/admin/combustion_app/fuel/add/">Django Admin</a>.</small>
+            <small>Add new fuels in the <a href="/admin/combustion_app/fuel/add/">Django Admin</a> or run the migration.</small>
         </div>
         
         <div class="form-group">
@@ -38,6 +38,46 @@
         </div>
         
         <button type="submit" class="btn">Run Simulation</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Simulation History (Recent 10)</h2>
+    
+    <form action="{% url 'compare_view' %}" method="GET">
+        <table class="results-table" style="font-size: 14px;">
+            <thead>
+                <tr>
+                    <th>Compare</th>
+                    <th>Run Name</th>
+                    <th>Fuel</th>
+                    <th>Cost (₹/GJ)</th>
+                    <th>Efficiency (%)</th>
+                    <th>Date</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in history_runs %}
+                <tr>
+                    <td style="text-align: center;">
+                        <input type="checkbox" name="run_ids" value="{{ run.id }}">
+                    </td>
+                    <td>{{ run.name }}</td>
+                    <td>{{ run.fuel.name|default:"N/A" }}</td>
+                    <td>{{ run.cost_per_gj|floatformat:2 }}</td>
+                    <td>{{ run.calculated_efficiency|floatformat:2 }}</td>
+                    <td>{{ run.run_date|date:"d M Y, h:i A" }}</td>
+                    <td><a href="{% url 'simulation_results' run_id=run.id %}">View</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center;">No simulation history found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn" style="margin-top: 20px;">Compare Selected (2+)</button>
     </form>
 </div>
 {% endblock %}

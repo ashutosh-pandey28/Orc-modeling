@@ -8,9 +8,44 @@
     <form method="post">
         {% csrf_token %}
         
-        <table style="width: 100%;">
-            {{ form.as_table }}
-        </table>
+        <div class="form-group">
+            <label for="{{ form.fuel.id_for_label }}">{{ form.fuel.label }}</label>
+            {{ form.fuel }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.variable_to_sweep.id_for_label }}">{{ form.variable_to_sweep.label }}</label>
+            {{ form.variable_to_sweep }}
+        </div>
+        <hr style="border:0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <h4>Sweep Range:</h4>
+        <div class="form-group">
+            <label for="{{ form.start_value.id_for_label }}">{{ form.start_value.label }}</label>
+            {{ form.start_value }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.end_value.id_for_label }}">{{ form.end_value.label }}</label>
+            {{ form.end_value }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.steps.id_for_label }}">{{ form.steps.label }}</label>
+            {{ form.steps }}
+        </div>
+        <hr style="border:0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <h4>Constant Parameters:</h4>
+        <div class="form-group" id="js-constant-moisture-group">
+            <label for="{{ form.constant_moisture.id_for_label }}">{{ form.constant_moisture.label }}</label>
+            {{ form.constant_moisture }}
+        </div>
+        <div class="form-group" id="js-constant-excess-air-group">
+            <label for="{{ form.constant_excess_air.id_for_label }}">{{ form.constant_excess_air.label }}</label>
+            {{ form.constant_excess_air }}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.constant_load.id_for_label }}">{{ form.constant_load.label }}</label>
+            {{ form.constant_load }}
+        </div>
         
         <button type="submit" class="btn" style="margin-top: 20px;">Run Analysis</button>
     </form>
@@ -36,6 +71,37 @@
 {% endblock %}
 
 {% block scripts %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get references to the elements
+        const sweepVar = document.getElementById('{{ form.variable_to_sweep.id_for_label }}');
+        const moistureGroup = document.getElementById('js-constant-moisture-group');
+        const excessAirGroup = document.getElementById('js-constant-excess-air-group');
+
+        // Function to update form visibility
+        function updateFormVisibility() {
+            if (sweepVar.value === 'moisture_percent') {
+                // Sweeping moisture, so HIDE constant moisture field
+                moistureGroup.style.display = 'none';
+                // SHOW constant excess air field
+                excessAirGroup.style.display = 'block';
+            } else { // Sweeping excess_air_percent
+                // SHOW constant moisture field
+                moistureGroup.style.display = 'block';
+                // HIDE constant excess air field
+                excessAirGroup.style.display = 'none';
+            }
+        }
+
+        // Add event listener to the dropdown
+        sweepVar.addEventListener('change', updateFormVisibility);
+        
+        // Run the function on page load to set the initial state
+        updateFormVisibility();
+    });
+</script>
+
 {% if chart_data %}
 <script>
     const analysisData = JSON.parse('{{ chart_data|safe }}');
